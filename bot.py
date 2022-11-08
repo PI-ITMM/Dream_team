@@ -26,11 +26,9 @@ def get_apis(period):
     yandex_req = req.get(url, headers={'X-Yandex-API-Key': key}, verify=False)
     json_data = yandex_req.text
     weather.append(json.loads(json_data))
-    if period >= 3:
-        for i in range(period):
-            url = config.api[i + 2]
-            json_data = urllib.request.urlopen(url).read()
-            weather.append(json.loads(json_data))
+    url = config.api[2]
+    json_data = urllib.request.urlopen(url).read()
+    weather.append(json.loads(json_data))
     # print(weather)
     return weather
 
@@ -39,11 +37,17 @@ def get_numbers(weather):
     current_weather = weather[0]['data'][0]
     wind_spd = array.array('f')  # массив для скорости ветра типа float
     temp = array.array('f')  # массив для температуры типа float
-    wind_spd.append(current_weather['wind_spd'])  # скорость ветра
-    wind_spd.append(weather[1]['forecasts'][0]['parts']['morning']['wind_speed'])
+    print(current_weather['days'][0]['windspeed'])
+    wind_spd.append(current_weather['wind_spd'])  # скорость ветра 1 апи
+    wind_spd.append(weather[1]['forecasts'][0]['parts']['morning']['wind_speed'])  # 2 апи
+    wind_spd.append(weather[2]['days'][0]['windspeed'])
     wind_spd1 = comparison(wind_spd)
-    temp.append(current_weather['app_temp'])  # температура
-    temp.append(weather[1]['forecasts'][0]['parts']['morning']['temp_avg'])
+    print(current_weather['days'][0]['temp'])
+
+    temp.append(current_weather['app_temp'])  # температура 1 апи
+    temp.append(weather[1]['forecasts'][0]['parts']['morning']['temp_avg'])  # 2 апи
+    temp.append(weather[2]['days'][0]['temp'])  # 3 апи
+
     temp1 = comparison(temp)
     # можно ли будет добавить направление ветра?
     date = weather[1]['date']
