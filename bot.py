@@ -17,12 +17,12 @@ def get_apis(period):
     url = config.api[0] #берем первую ссылку на апи
     #print(url)
     json_data = urllib.request.urlopen(url).read()  # читаем данные из JSON полученного из нашей ссылки
+    weather = []
     weather.append(json.loads(json_data)) #добавляем в конец листа наш JSON
     key = config.settings['yan_key']
     url = config.api[1]
     yandex_req = req.get(url, headers={'X-Yandex-API-Key': key}, verify=False)
     json_data = yandex_req.text
-    weather = []
     weather.append(json.loads(json_data))
     if period >= 3:
         for i in range(period):
