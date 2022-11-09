@@ -4,9 +4,7 @@ import urllib
 import json
 import requests as req
 from vk_api.bot_longpoll import VkBotLongPoll, VkBotEventType
-from vk_api.longpoll import VkLongPoll, VkEventType
 from vk_api.keyboard import VkKeyboard, VkKeyboardColor
-from vk_api.utils import get_random_id
 import string
 import array
 
@@ -42,20 +40,20 @@ def get_numbers(weather):
     temp = array.array('f')  # массив для температуры типа float
 
     wind_spd.append(current_weather['wind_spd'])  # скорость ветра 1 апи
-    wind_spd.append(weather[1]['forecasts'][0]['parts']['morning']['wind_speed'])  # 2 апи
-    wind_spd.append(weather[2]['days'][0]['windspeed'])
+    wind_spd.append(weather[2]['forecasts'][0]['parts']['morning']['wind_speed'])  # 2 апи
+    wind_spd.append(weather[1]['days'][0]['windspeed'])
     wind_spd1 = comparison(wind_spd)
     wind_spd1 = toFixed(wind_spd1, 2)
 
     temp.append(current_weather['app_temp'])  # температура 1 апи
-    temp.append(weather[1]['forecasts'][0]['parts']['morning']['temp_avg'])  # 2 апи
-    temp.append(weather[2]['days'][0]['temp'])  # 3 апи
+    temp.append(weather[2]['forecasts'][0]['parts']['morning']['temp_avg'])  # 2 апи
+    temp.append(weather[1]['days'][0]['temp'])  # 3 апи
 
     temp1 = comparison(temp)
     temp1 = toFixed(temp1, 2)
     # можно ли будет добавить направление ветра?
-    date = weather[1]['forecasts'][0]['date']
-    wind_dir = weather[1]['forecasts'][0]['parts']['morning']['wind_dir']
+    date = weather[2]['forecasts'][0]['date']
+    wind_dir = weather[2]['forecasts'][0]['parts']['morning']['wind_dir']
     weather = date + '\n' + 'Температура - ' + str(temp1) + 'C \n' + "Ветер - " + wind_change(
         wind_dir) + '\nСкорость ветра - ' + str(wind_spd1) + ' м/с'
     return weather
