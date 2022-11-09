@@ -6,7 +6,7 @@ import requests as req
 from vk_api.bot_longpoll import VkBotLongPoll, VkBotEventType
 from vk_api.longpoll import VkLongPoll, VkEventType
 from vk_api.keyboard import VkKeyboard, VkKeyboardColor
-
+from vk_api.utils import get_random_id
 import string
 import array
 
@@ -16,22 +16,22 @@ group_id = config.settings['group_id']  # id выбранной для рабо�
 
 def get_apis(period):
     # объявляем лист для хранения апи погоды
-    url = config.api[0]  # берем первую ссылку на апи
-    # print(url)
-    json_data = urllib.request.urlopen(url).read()  # читаем данные из JSON полученного из нашей ссылки
     weather = []
-    weather.append(json.loads(json_data))  # добавляем в конец листа наш JSON
+    if period==7:
+        url = config.api[0]  # берем первую ссылку на апи
+        # print(url)
+        json_data = urllib.request.urlopen(url).read()  # читаем данные из JSON полученного из нашей ссылки
+        weather.append(json.loads(json_data))  # добавляем в конец листа наш JSON
+        url = config.api[2]
+        json_data = urllib.request.urlopen(url).read()
+        weather.append(json.loads(json_data))
+
     key = config.settings['yan_key']
     url = config.api[1]
     yandex_req = req.get(url, headers={'X-Yandex-API-Key': key}, verify=False)
     json_data = yandex_req.text
-    print(json.loads(json_data))
     weather.append(json.loads(json_data))
-    if period >= 3:
-        for i in range(period):
-            url = config.api[i + 2]
-            json_data = urllib.request.urlopen(url).read()
-            weather.append(json.loads(json_data))
+
     # print(weather)
     return weather
 
@@ -40,19 +40,25 @@ def get_numbers(weather):
     current_weather = weather[0]['data'][0]
     wind_spd = array.array('f')  # массив для скорости ветра типа float
     temp = array.array('f')  # массив для температуры типа float
-    wind_spd.append(current_weather['wind_spd'])  # скорость ветра
-    wind_spd.append(weather[1]['forecasts'][0]['parts']['morning']['wind_speed'])
+
+    wind_spd.append(current_weather['wind_spd'])  # скорость ветра 1 апи
+    wind_spd.append(weather[1]['forecasts'][0]['parts']['morning']['wind_speed'])  # 2 апи
+    wind_spd.append(weather[2]['days'][0]['windspeed'])
     wind_spd1 = comparison(wind_spd)
-    temp.append(current_weather['app_temp'])  # температура
-    temp.append(weather[1]['forecasts'][0]['parts']['morning']['temp_avg'])
+    wind_spd1 = toFixed(wind_spd1, 2)
+
+    temp.append(current_weather['app_temp'])  # температура 1 апи
+    temp.append(weather[1]['forecasts'][0]['parts']['morning']['temp_avg'])  # 2 апи
+    temp.append(weather[2]['days'][0]['temp'])  # 3 апи
+
     temp1 = comparison(temp)
+    temp1 = toFixed(temp1, 2)
     # можно ли будет добавить направление ветра?
     date = weather[1]['forecasts'][0]['date']
     wind_dir = weather[1]['forecasts'][0]['parts']['morning']['wind_dir']
     weather = date + '\n' + 'Температура - ' + str(temp1) + 'C \n' + "Ветер - " + wind_change(
         wind_dir) + '\nСкорость ветра - ' + str(wind_spd1) + ' м/с'
     return weather
-
 
 def comparison(num):
     average = sum(num) / len(num)
@@ -84,65 +90,60 @@ def wind_change(wind_dir):
 
 def cond_change(condition): # переводим состояние погоды
     if condition == "clear":
-        cond = "\U00002600 Ясно"
+        cond = "Ясно \U00002600"
     if condition == "partly-cloudy":
-        cond = "\U000026C5 Малооблачно"
+        cond = "Малооблачно \U000026C5"
     if condition == "cloudy":
-        cond = "\U0001F324 Облачно с прояснениями"
+        cond = "Облачно с прояснениями \U0001F324"
     if condition == "overcast":
-        cond = "\U00002601 Пасмурно"
+        cond = "Пасмурно \U00002601"
     if condition == "drizzle":
-        cond = "\U0001F327 Морось"
+        cond = "Морось \U0001F327"
     if condition == "light-rain":
-        cond = "\U0001F326 Небольшой дождь"
+        cond = "Небольшой дождь \U0001F326"
     if condition == "rain":
-        cond = "\U0001F327 Дождь"
+        cond = "Дождь \U0001F327"
     if condition == "moderate-rain":
-        cond = "\U0001F327 Умеренно сильный дождь"
+        cond = "Умеренно сильный дождь \U0001F327"
     if condition == "heavy-rain":
-        cond = "\U0001F327 Сильный дождь"
+        cond = "Сильный дождь \U0001F327"
     if condition == "continuous-heavy-rain":
-        cond = "\U0001F327 Длительный сильный дождьм"
+        cond = "Длительный сильный дождьм \U0001F327"
     if condition == "showers":
-        cond = "\U0001F327 Ливень"
+        cond = "Ливень \U0001F327"
     if condition == "wet-snow":
-        cond = "\U0001F328 Дождь со снегом"
+        cond = "Дождь со снегом \U0001F328"
     if condition == "light-snow":
-        cond = "\U0001F328 Небольшой снег"
+        cond = "Небольшой снег \U0001F328"
     if condition == "snow":
-        cond = "\U00002744 Снег"
+        cond = "Снег \U00002744"
     if condition == "snow-showers":
-        cond = "\U0001F328 Снегопад"
+        cond = "Снегопад \U0001F328"
     if condition == "hail":
-        cond = "\U0001F327 Град"
+        cond = "Град \U0001F327"
     if condition == "thunderstorm":
-        cond = "\U0001F329 Гроза"
+        cond = "Гроза \U0001F329"
     if condition == "thunderstorm-with-rain":
-        cond = "\U000026C8 Дождь с грозой"
+        cond = "Дождь с грозой \U000026C8"
     if condition == "thunderstorm-with-hail":
-        cond = "\U000026C8 Гроза с градом"
+        cond = "Гроза с градом \U000026C8"
     return cond
 
 def print_weather(period, i):  # функция получения текущего города
     # print(data)
     data = get_apis(2)
-    if period == 1 | 7:
+    if period == 7:
         current_weather = data[0]['data'][i]  # выбираем нужную нам часть с данными
         date = current_weather['datetime']
         desc = current_weather['weather']['description']
         wind = current_weather['wind_cdir_full']
         wind_spd = current_weather['wind_spd']
         wind_spd = toFixed(wind_spd, 2)
-        if period == 1:
-            city = current_weather['city_name']
-            temp = current_weather['app_temp']
-            weather = date + '\n' + desc + '\n \U0001F321  Температура  ' + str(temp) + '°C \n' + "\U0001F32C Ветер - " + wind + '\nСкорость ветра - ' + str(wind_spd) + ' м/с'
-        elif period == 7:
-            temp = current_weather['app_max_temp']
-            weather = date + '\n' + desc + ' - ' + '\n \U0001F321 макс. температура - ' + str(temp) + '°C \n' + "\U0001F32C Ветер - " + wind + '\nСкорость ветра - ' + str(wind_spd) + ' м/с'
+        temp = current_weather['app_max_temp']
+        weather = date + '\n' + desc + ' - ' + '\nмакс. температура - ' + str(temp) + '°C \n' + "Ветер - " + wind + '\nСкорость ветра - ' + str(wind_spd) + ' м/с'
 
-    elif period == 6 or 3 or 2:
-        current_weather = data[1]['forecasts'][i]
+    elif period == 1 or 3 or 2:
+        current_weather = data[0]['forecasts'][i]
         #date = current_weather['date'] # дата погоды
         condition = current_weather['parts']['day_short']['condition'] # погодное описание
         #icon = current_weather['parts']['day_short']['icon'] # иконка погоды
@@ -152,7 +153,7 @@ def print_weather(period, i):  # функция получения текуще�
         temp_max = current_weather['parts']['day_short']['temp'] # макс температура
         wind = current_weather['parts']['day_short']['wind_speed'] # скорость ветра
         wind_dir = current_weather['parts']['morning']['wind_dir'] # направление ветра
-        weather =  cond_change(condition) + '\n' + '\U0001F321  Температура от ' + str(temp_min) + '°C до ' + str(temp_max) + "°C\n\t  По ощущениям как "+ str(feels_like) + "°C\n\t   Влажность воздуха " + str(humidity) + "%\n\U0001F32C  Ветер " + wind_change(wind_dir) + ', ' + str(wind) + ' м/с'
+        weather = cond_change(condition) + '\n' + 'Температура от ' + str(temp_min) + '°C до ' + str(temp_max) + "°C\n\t  По ощущениям как "+ str(feels_like) + "°C\n\t   Влажность воздуха " + str(humidity) + "%\nВетер " + wind_change(wind_dir) + ', ' + str(wind) + ' м/с'
     return weather
 
 
@@ -196,7 +197,7 @@ def menu(reseived_message):
 
     if reseived_message.endswith('сегодня'): # если в конце сообщения будет "сегодня"
         print("Погода на сегодня отправлена в ", chat)
-        write_message(chat, print_weather(6, 0))
+        write_message(chat, print_weather(1, 0))
 
     elif reseived_message.endswith('3дня'):
         print("Погода на 3 дня отправлена в ", chat)
@@ -210,7 +211,7 @@ def menu(reseived_message):
 
     elif reseived_message.endswith('текущая'):
         print("Текущая погода отправлена в ", chat)
-        weather = get_apis(2)
+        weather = get_apis(7)
         write_message(chat, get_numbers(weather))
 
     elif reseived_message.endswith('завтра'):
