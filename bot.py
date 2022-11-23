@@ -10,23 +10,42 @@ import array
 
 token = config.settings['TOKEN']  # присваиваем переменной значение токена из файла конфига
 group_id = config.settings['group_id']  # id выбранной для работы бота группы
+url=[]
 
+for i in range(3):
+    url.append(config.api[i])
 
-def get_apis(period):
+сoord=config.api[0][39:68]
+
+latitude=сoord[4:14] #'56.3264816'
+longtitude=сoord[19:29]#'44.0051395'
+print(сoord,' ',latitude,' ',longtitude)
+
+newlat='66.66666'
+newlong='69.6969'
+def setnewcoord(newlat,newlong):
+    new = []
+    for i in range(3):
+        new.append(url[i])
+        new[i]=url[i].replace(longtitude, newlong)
+        new[i] = new[i].replace(latitude, newlat)
+        print(new[i])
+        url[i]=new[i]
+
+def get_apis(period,url):
     # объявляем лист для хранения апи погоды
     weather = []
     if period==7:
-        url = config.api[0]  # берем первую ссылку на апи
-        # print(url)
-        json_data = urllib.request.urlopen(url).read()  # читаем данные из JSON полученного из нашей ссылки
+
+        json_data = urllib.request.urlopen(url[0]).read()  # читаем данные из JSON полученного из нашей ссылки
         weather.append(json.loads(json_data))  # добавляем в конец листа наш JSON
-        url = config.api[2]
-        json_data = urllib.request.urlopen(url).read()
+
+        json_data = urllib.request.urlopen(url[2]).read()
         weather.append(json.loads(json_data))
 
     key = config.settings['yan_key']
-    url = config.api[1]
-    yandex_req = req.get(url, headers={'X-Yandex-API-Key': key}, verify=False)
+
+    yandex_req = req.get(url[1], headers={'X-Yandex-API-Key': key}, verify=False)
     json_data = yandex_req.text
     weather.append(json.loads(json_data))
 
@@ -129,7 +148,7 @@ def cond_change(condition): # переводим состояние погоды
 
 def print_weather(period, i):  # функция получения текущего города
     # print(data)
-    data = get_apis(2)
+    data = get_apis(2,url)
     if period == 7:
         current_weather = data[0]['data'][i]  # выбираем нужную нам часть с данными
         date = current_weather['datetime']
