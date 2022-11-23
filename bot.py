@@ -129,7 +129,7 @@ def cond_change(condition): # переводим состояние погоды
 
 def print_weather(period, i):  # функция получения текущего города
     # print(data)
-    data = get_apis(2)
+    data = get_apis(period)
     if period == 7:
         current_weather = data[0]['data'][i]  # выбираем нужную нам часть с данными
         date = current_weather['datetime']
