@@ -14,6 +14,7 @@ url=[]
 
 for i in range(3):
     url.append(config.api[i])
+   # print(url)
 
 сoord=config.api[0][39:68]
 
@@ -36,6 +37,9 @@ def get_apis(period,url):
     # объявляем лист для хранения апи погоды
     weather = []
     if period==7:
+        json_data = urllib.request.urlopen(config.api['week']).read()  # читаем данные из JSON полученного из нашей ссылки
+        weather.append(json.loads(json_data))  # добавляем в конец листа наш JSON
+    if period==0:
 
         json_data = urllib.request.urlopen(url[0]).read()  # читаем данные из JSON полученного из нашей ссылки
         weather.append(json.loads(json_data))  # добавляем в конец листа наш JSON
@@ -148,8 +152,10 @@ def cond_change(condition): # переводим состояние погоды
 
 def print_weather(period, i):  # функция получения текущего города
     # print(data)
-    data = get_apis(2,url)
+
+    data = get_apis(period, url)
     if period == 7:
+
         current_weather = data[0]['data'][i]  # выбираем нужную нам часть с данными
         date = current_weather['datetime']
         desc = current_weather['weather']['description']
@@ -228,7 +234,7 @@ def menu(reseived_message):
 
     elif reseived_message.endswith('текущая'):
         print("Текущая погода отправлена в ", chat)
-        weather = get_apis(7)
+        weather = get_apis(0,url)
         write_message(chat, get_numbers(weather))
 
     elif reseived_message.endswith('завтра'):
@@ -243,5 +249,11 @@ for event in longpoll.listen():  # ждем от сервера ответа о 
         reseived_message = reseived_message.translate({ord(c): None for c in string.whitespace})  # если было введено раздельно, убрали пробелы
 
         chat = event.chat_id  # сохраняем номер чата
+        #result = authorize.method("messages.getById", {"message_ids": [event.message_id],"group_id": 189072320})
+        result=authorize.method("users.get")
+        print(result)
+       # geo = reseived_message['items'][0]['geo']['coordinates']
+        #latitude, longitude = geo['latitude'], geo['longitude']
+        #print(latitude, longitude)
         print('из чата', chat)
         menu(reseived_message.lower())
