@@ -184,6 +184,8 @@ def menu(reseived_message):
 
 
     if reseived_message == "начать":
+        keyboard.add_location_button() # добавить кнопку геолокации
+        keyboard.add_line()  # добавить линию
         keyboard.add_button("Текущая") # добавить кнопку
         keyboard.add_line() # добавить линию
         keyboard.add_button("Сегодня")
@@ -217,6 +219,12 @@ def menu(reseived_message):
         write_message(chat, print_weather(2, 1))
 
 for event in longpoll.listen():  # ждем от сервера ответа о произошедшем событии
+    if event.type == VkBotEventType.MESSAGE_NEW and event.from_chat and event.message.get('geo'):
+        geo = event.message.get('geo')['coordinates']
+        newlat = geo['latitude']
+        newlong = geo['longitude']
+        setnewcoord(newlat, newlong)
+    
     if event.type == VkBotEventType.MESSAGE_NEW and event.from_chat and event.message.get('text'):
         # если тип ивента это новое сообщение, оно из чата и сообщение в ивенте текстовое
 
