@@ -20,18 +20,20 @@ for i in range(3):
 
 latitude=сoord[4:14] #'56.3264816'
 longtitude=сoord[19:29]#'44.0051395'
-print(сoord,' ',latitude,' ',longtitude)
+#print(сoord,' ',latitude,' ',longtitude)
 
 newlat='66.66666'
 newlong='69.6969'
 def setnewcoord(newlat,newlong):
     new = []
+    print('Новые координаты-',newlat,'  ',newlong)
     for i in range(3):
         new.append(url[i])
         new[i]=url[i].replace(longtitude, newlong)
         new[i] = new[i].replace(latitude, newlat)
-        print(new[i])
+      #  print(new[i])
         url[i]=new[i]
+
 
 def get_apis(period,url):
     # объявляем лист для хранения апи погоды
@@ -40,7 +42,8 @@ def get_apis(period,url):
         json_data = urllib.request.urlopen(config.api['week']).read()  # читаем данные из JSON полученного из нашей ссылки
         weather.append(json.loads(json_data))  # добавляем в конец листа наш JSON
     if period==0:
-
+         # берем первую ссылку на апи
+        # print(url)
         json_data = urllib.request.urlopen(url[0]).read()  # читаем данные из JSON полученного из нашей ссылки
         weather.append(json.loads(json_data))  # добавляем в конец листа наш JSON
 
@@ -48,12 +51,10 @@ def get_apis(period,url):
         weather.append(json.loads(json_data))
 
     key = config.settings['yan_key']
-
     yandex_req = req.get(url[1], headers={'X-Yandex-API-Key': key}, verify=False)
     json_data = yandex_req.text
     weather.append(json.loads(json_data))
 
-    # print(weather)
     return weather
 
 
@@ -209,13 +210,15 @@ def menu(reseived_message):
 
 
     if reseived_message == "начать":
+        keyboard.add_location_button()  # добавить кнопку геолокации
+        keyboard.add_line()       # добавить линию
         keyboard.add_button("Текущая") # добавить кнопку
-        keyboard.add_line() # добавить линию
         keyboard.add_button("Сегодня")
+        keyboard.add_line()
         keyboard.add_button("Завтра")
         keyboard.add_button("3 дня")
         keyboard.add_button("Неделя")
-        #keyboard.add_location_button()  # добавить кнопку "геолокации" белого цвета
+
         write_message(chat, "Вас приветствует бот прогноза погоды!", keyboard)
 
     if reseived_message.endswith('сегодня'): # если в конце сообщения будет "сегодня"
@@ -242,18 +245,18 @@ def menu(reseived_message):
         write_message(chat, print_weather(2, 1))
 
 for event in longpoll.listen():  # ждем от сервера ответа о произошедшем событии
+    if event.type == VkBotEventType.MESSAGE_NEW and event.from_chat and event.message.get('geo'):
+        chat = event.chat_id # сохраняем номер чата
+        geo = event.message.get('geo')['coordinates']
+        newlat = geo['latitude']
+        newlong = geo['longitude']
+        setnewcoord(str(newlat), str(newlong))
+        write_message(chat, "Задано ваше местоположение")
+
     if event.type == VkBotEventType.MESSAGE_NEW and event.from_chat and event.message.get('text'):
         # если тип ивента это новое сообщение, оно из чата и сообщение в ивенте текстовое
-
         reseived_message = event.message.get('text')  # то сохраняем полученное сообщение
         reseived_message = reseived_message.translate({ord(c): None for c in string.whitespace})  # если было введено раздельно, убрали пробелы
 
-        chat = event.chat_id  # сохраняем номер чата
-        #result = authorize.method("messages.getById", {"message_ids": [event.message_id],"group_id": 189072320})
-        result=authorize.method("users.get")
-        print(result)
-       # geo = reseived_message['items'][0]['geo']['coordinates']
-        #latitude, longitude = geo['latitude'], geo['longitude']
-        #print(latitude, longitude)
         print('из чата', chat)
         menu(reseived_message.lower())
