@@ -156,7 +156,6 @@ def print_weather(period, i):  # функция получения текуще�
 
     data = get_apis(period, url)
     if period == 7:
-
         current_weather = data[0]['data'][i]  # выбираем нужную нам часть с данными
         date = current_weather['datetime']
         desc = current_weather['weather']['description']
