@@ -21,7 +21,7 @@ url=[]
 
 for i in range(3):
     url.append(config.api[i])
-   # print(url)
+
 
 сoord=config.api[0][39:68]
 
@@ -160,15 +160,11 @@ def cond_change(condition): # переводим состояние погоды
     return cond
 
 def print_weather(period, i):  # функция получения текущего города
-    # print(data)
 
     data = get_apis(period, url)
     if period == 0:
         current_weather = data[0]['forecasts'][i]
-        #date = current_weather['date'] # дата погоды
         condition = current_weather['hours'][int(current_time)]['condition'] # погодное описание
-        #icon = current_weather['parts']['day_short']['icon'] # иконка погоды
-        #temp_min = current_weather['hours']['hour']['temp_min'] # мин температура
         feels_like = current_weather['hours'][int(current_time)]['feels_like'] # ощущается как
         humidity = current_weather['hours'][int(current_time)]['humidity'] # влажность воздуха
         temp = current_weather['hours'][int(current_time)]['temp'] #температура
@@ -178,7 +174,6 @@ def print_weather(period, i):  # функция получения текуще�
 
     elif period == 7 or 3 or 2:
         current_weather = data[0]['forecasts'][i]
-        #date = current_weather['date'] # дата погоды
         condition = current_weather['parts']['day_short']['condition'] # погодное описание
         temp_min = current_weather['parts']['day_short']['temp_min'] # мин температура
         feels_like = current_weather['parts']['day_short']['feels_like'] # ощущается как
