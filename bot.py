@@ -7,6 +7,13 @@ from vk_api.bot_longpoll import VkBotLongPoll, VkBotEventType
 from vk_api.keyboard import VkKeyboard, VkKeyboardColor
 import string
 import array
+import time
+
+
+t = time.localtime()
+current_time = time.strftime("%H", t)
+
+
 
 token = config.settings['TOKEN']  # присваиваем переменной значение токена из файла конфига
 group_id = config.settings['group_id']  # id выбранной для работы бота группы
@@ -156,27 +163,29 @@ def print_weather(period, i):  # функция получения текуще�
     # print(data)
 
     data = get_apis(period, url)
-    if period == 7:
-        current_weather = data[0]['data'][i]  # выбираем нужную нам часть с данными
-        date = current_weather['datetime']
-        desc = current_weather['weather']['description']
-        wind = current_weather['wind_cdir_full']
-        wind_spd = current_weather['wind_spd']
-        wind_spd = toFixed(wind_spd, 2)
-        temp = current_weather['app_max_temp']
-        weather = date + '\n' + desc + ' - ' + '\nмакс. температура - ' + str(temp) + '°C \n' + "Ветер - " + wind + '\nСкорость ветра - ' + str(wind_spd) + ' м/с'
+    if period == 0:
+        current_weather = data[0]['forecasts'][i]
+        #date = current_weather['date'] # дата погоды
+        condition = current_weather['hours'][int(current_time)]['condition'] # погодное описание
+        #icon = current_weather['parts']['day_short']['icon'] # иконка погоды
+        #temp_min = current_weather['hours']['hour']['temp_min'] # мин температура
+        feels_like = current_weather['hours'][int(current_time)]['feels_like'] # ощущается как
+        humidity = current_weather['hours'][int(current_time)]['humidity'] # влажность воздуха
+        temp = current_weather['hours'][int(current_time)]['temp'] #температура
+        wind = current_weather['hours'][int(current_time)]['wind_speed'] # скорость ветра
+        wind_dir = current_weather['hours'][int(current_time)]['wind_dir'] # направление ветра
+        weather = cond_change(condition) + '\n' + 'Температура ' + str(temp) + "°C\n\t  По ощущениям как "+ str(feels_like) + "°C\n\t   Влажность воздуха " + str(humidity) + "%\nВетер " + wind_change(wind_dir) + ', ' + str(wind) + ' м/с'
 
-    elif period == 0 or 3 or 2:
+    elif period == 7 or 3 or 2:
         current_weather = data[0]['forecasts'][i]
         #date = current_weather['date'] # дата погоды
         condition = current_weather['parts']['day_short']['condition'] # погодное описание
-        #icon = current_weather['parts']['day_short']['icon'] # иконка погоды
         temp_min = current_weather['parts']['day_short']['temp_min'] # мин температура
         feels_like = current_weather['parts']['day_short']['feels_like'] # ощущается как
         humidity = current_weather['parts']['day_short']['humidity'] # влажность воздуха
         temp_max = current_weather['parts']['day_short']['temp'] # макс температура
         wind = current_weather['parts']['day_short']['wind_speed'] # скорость ветра
-        wind_dir = current_weather['parts']['morning']['wind_dir'] # направление ветра
+        wind_dir = current_weather['parts']['day_short']['wind_dir'] # направление ветра
         weather = cond_change(condition) + '\n' + 'Температура от ' + str(temp_min) + '°C до ' + str(temp_max) + "°C\n\t  По ощущениям как "+ str(feels_like) + "°C\n\t   Влажность воздуха " + str(humidity) + "%\nВетер " + wind_change(wind_dir) + ', ' + str(wind) + ' м/с'
     return weather
 
@@ -257,6 +266,6 @@ for event in longpoll.listen():  # ждем от сервера ответа о 
         # если тип ивента это новое сообщение, оно из чата и сообщение в ивенте текстовое
         reseived_message = event.message.get('text')  # то сохраняем полученное сообщение
         reseived_message = reseived_message.translate({ord(c): None for c in string.whitespace})  # если было введено раздельно, убрали пробелы
-
+        chat = event.chat_id  # сохраняем номер чата
         print('из чата', chat)
         menu(reseived_message.lower())
