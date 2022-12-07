@@ -20,7 +20,7 @@ for i in range(3):
 
 latitude=сoord[4:14] #'56.3264816'
 longtitude=сoord[19:29]#'44.0051395'
-#print(сoord,' ',latitude,' ',longtitude)
+
 
 newlat='66.66666'
 newlong='69.6969'
@@ -31,7 +31,7 @@ def setnewcoord(newlat,newlong):
         new.append(url[i])
         new[i]=url[i].replace(longtitude, newlong)
         new[i] = new[i].replace(latitude, newlat)
-      #  print(new[i])
+      
         url[i]=new[i]
 
 
@@ -41,9 +41,9 @@ def get_apis(period,url):
     if period==7:
         json_data = urllib.request.urlopen(config.api['week']).read()  # читаем данные из JSON полученного из нашей ссылки
         weather.append(json.loads(json_data))  # добавляем в конец листа наш JSON
-    if period==0:
+    if period==1:
          # берем первую ссылку на апи
-        # print(url)
+       
         json_data = urllib.request.urlopen(url[0]).read()  # читаем данные из JSON полученного из нашей ссылки
         weather.append(json.loads(json_data))  # добавляем в конец листа наш JSON
 
@@ -64,22 +64,23 @@ def get_numbers(weather):
     temp = array.array('f')  # массив для температуры типа float
 
     wind_spd.append(current_weather['wind_spd'])  # скорость ветра 1 апи
-    wind_spd.append(weather[2]['forecasts'][0]['parts']['morning']['wind_speed'])  # 2 апи
+    wind_spd.append(weather[2]['forecasts'][0]['parts']['day']['wind_speed'])  # 2 апи
     wind_spd.append(weather[1]['days'][0]['windspeed'])
     wind_spd1 = comparison(wind_spd)
     wind_spd1 = toFixed(wind_spd1, 2)
 
     temp.append(current_weather['app_temp'])  # температура 1 апи
-    temp.append(weather[2]['forecasts'][0]['parts']['morning']['temp_avg'])  # 2 апи
+    temp.append(weather[2]['forecasts'][0]['parts']['day']['temp_avg'])  # 2 апи
     temp.append(weather[1]['days'][0]['temp'])  # 3 апи
 
     temp1 = comparison(temp)
     temp1 = toFixed(temp1, 2)
-    # можно ли будет добавить направление ветра?
+   
     date = weather[2]['forecasts'][0]['date']
-    wind_dir = weather[2]['forecasts'][0]['parts']['morning']['wind_dir']
-    weather = date + '\n' + 'Температура - ' + str(temp1) + 'C \n' + "Ветер - " + wind_change(
-        wind_dir) + '\nСкорость ветра - ' + str(wind_spd1) + ' м/с'
+    condition =  weather[2]['forecasts'][0]['parts']['day_short']['condition']
+    wind_dir = weather[2]['forecasts'][0]['parts']['day']['wind_dir']
+    weather = date + '\n' + cond_change(condition)+ '\n'+'Температура ' + str(temp1) + '°C\n\t' + "Ветер " + wind_change(
+        wind_dir)+ ', ' + str(wind_spd1) + ' м/с'
     return weather
 
 def comparison(num):
@@ -165,7 +166,7 @@ def print_weather(period, i):  # функция получения текуще�
         temp = current_weather['app_max_temp']
         weather = date + '\n' + desc + ' - ' + '\nмакс. температура - ' + str(temp) + '°C \n' + "Ветер - " + wind + '\nСкорость ветра - ' + str(wind_spd) + ' м/с'
 
-    elif period == 1 or 3 or 2:
+    elif period == 0 or 3 or 2:
         current_weather = data[0]['forecasts'][i]
         #date = current_weather['date'] # дата погоды
         condition = current_weather['parts']['day_short']['condition'] # погодное описание
@@ -222,7 +223,8 @@ def menu(reseived_message):
 
     if reseived_message.endswith('сегодня'): # если в конце сообщения будет "сегодня"
         print("Погода на сегодня отправлена в ", chat)
-        write_message(chat, print_weather(1, 0))
+        weather = get_apis(1, url)
+        write_message(chat, get_numbers(weather))
 
     elif reseived_message.endswith('3дня'):
         print("Погода на 3 дня отправлена в ", chat)
@@ -236,8 +238,7 @@ def menu(reseived_message):
 
     elif reseived_message.endswith('текущая'):
         print("Текущая погода отправлена в ", chat)
-        weather = get_apis(0,url)
-        write_message(chat, get_numbers(weather))
+        write_message(chat, print_weather(0, 0))
 
     elif reseived_message.endswith('завтра'):
         print("Погода на завтра отправлена в ", chat)
