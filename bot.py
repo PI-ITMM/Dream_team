@@ -45,9 +45,6 @@ def setnewcoord(newlat,newlong):
 def get_apis(period,url):
     # объявляем лист для хранения апи погоды
     weather = []
-    if period==7:
-        json_data = urllib.request.urlopen(config.api['week']).read()  # читаем данные из JSON полученного из нашей ссылки
-        weather.append(json.loads(json_data))  # добавляем в конец листа наш JSON
     if period==1:
          # берем первую ссылку на апи
        
@@ -61,7 +58,7 @@ def get_apis(period,url):
     yandex_req = req.get(url[1], headers={'X-Yandex-API-Key': key}, verify=False)
     json_data = yandex_req.text
     weather.append(json.loads(json_data))
-
+    print(json_data)
     return weather
 
 
