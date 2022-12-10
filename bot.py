@@ -178,6 +178,8 @@ def print_weather(period, i):  # функция получения текуще�
         temp_max = current_weather['parts']['day_short']['temp'] # макс температура
         wind = current_weather['parts']['day_short']['wind_speed'] # скорость ветра
         wind_dir = current_weather['parts']['day_short']['wind_dir'] # направление ветра
+        if period == 7:
+            write_message(chat,current_weather['date'])
         weather = cond_change(condition) + '\n' + 'Температура от ' + str(temp_min) + '°C до ' + str(temp_max) + "°C\n\t  По ощущениям как "+ str(feels_like) + "°C\n\t   Влажность воздуха " + str(humidity) + "%\nВетер " + wind_change(wind_dir) + ', ' + str(wind) + ' м/с'
     return weather
 
